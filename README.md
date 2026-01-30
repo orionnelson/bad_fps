@@ -7,16 +7,15 @@ One codebase, two clean apps:
 Quickstart (local)
 
 1) Start the server:
-   python -m pip install -r server/requirements.txt
-   python -m server.app
+   `python -m pip install -r server/requirements.txt`
+   `python -m server.app` # Backend
 
 2) Prepare client shared files (optional but recommended):
    python tools/pack_assets.py
 
-3) Serve the client separately:
-   python -m server.app # Backend
-   cd client
-   python -m http.server 5173 # Frontend 
+3) Serve the client separately: 
+   `cd client`
+   `python -m http.server 5173` # Frontend 
 
 4) Open the game:
    http://localhost:5173/public/index.html
