@@ -36,3 +36,5 @@ Local multiplayer
 
 <img width="2473" height="1288" alt="image" src="https://github.com/user-attachments/assets/055dc40b-babc-43a7-bd80-222d7f1faccd" />
 - Local Multiplayer
+ <img width="1238" height="773" alt="image" src="https://github.com/user-attachments/assets/c00e5bd8-8252-4f94-a0fd-2a68fe1a1377" />
+ - Ugly Menu
