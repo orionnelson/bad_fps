@@ -30,3 +30,10 @@ Online multiplayer
 Local multiplayer
 - Toggle "Local Split" in the client UI.
 - The client opens 2 WS connections to the same server (localhost or remote).
+<img width="2517" height="1238" alt="image" src="https://github.com/user-attachments/assets/a8977fe4-7f65-4f2d-a1f9-54653467a8de" />
+- Single player 
+<img width="3028" height="1462" alt="image" src="https://github.com/user-attachments/assets/24d3af4f-544a-40b1-bbee-7d34db552911" />
+- Online Multiplayer 
+
+<img width="2473" height="1288" alt="image" src="https://github.com/user-attachments/assets/055dc40b-babc-43a7-bd80-222d7f1faccd" />
+- Local Multiplayer
