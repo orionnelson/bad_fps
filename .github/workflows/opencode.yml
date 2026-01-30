@@ -1,0 +1,245 @@
+spec_version: 1.0
+project: fps_authoritative_multiplayer
+goal: one_codebase_two_apps
+principles:
+  - server_authoritative
+  - thin_client
+  - no_shared_gameplay_logic
+  - online_and_local_multiplayer_supported
+
+apps:
+  server:
+    language: python
+    responsibility:
+      - simulation
+      - validation
+      - rooms
+      - persistence
+      - anti_cheat
+    owns_static_files: false
+    entrypoints:
+      http: app.py
+      websocket: app.py
+    tick:
+      simulation_hz: 60
+      snapshot_hz: 15
+    layout:
+      server:
+        app.py: http_and_ws_entrypoint
+        game:
+          config.py: tickrates_caps_maps_weapon_stats
+          protocol.py: message_schema_and_validation
+          world.py: world_state_container
+          room.py: room_lifecycle
+          systems:
+            movement.py: authoritative_movement_sim
+            weapons.py: fire_rate_recoil_ammo_reload
+            projectiles.py: hitscan_and_projectile_updates
+            collision.py: broadphase_and_narrowphase
+            damage.py: armor_headshot_knockback
+            powerups.py: spawn_pickup_cooldowns
+            scoring.py: kills_assists_win_conditions
+          maps:
+            map01.json: colliders_spawns_pickups
+            navmesh.bin: optional_nav_data
+          ai:
+            behavior.py: fsm_or_utility_ai
+            nav.py: astar_navigation
+        net:
+          ws.py: websocket_handlers
+          rate_limit.py: per_client_limits
+          snapshots.py: delta_compression_and_cache
+        storage:
+          memory.py: runtime_state
+          sqlite.py: stats_and_leaderboard
+        requirements.txt: python_dependencies
+        README.md: server_docs
+
+  client:
+    platform: web
+    responsibility:
+      - rendering
+      - input
+      - prediction
+      - interpolation
+      - ui
+      - audio
+    served_separately: true
+    layout:
+      client:
+        public:
+          index.html: html_shell
+          styles.css: base_styles
+          assets: static_assets
+        src:
+          main.js: boot
+          net:
+            transport.js: ws_connect_and_reconnect
+            clock.js: client_clock_and_rtt
+            prediction.js: client_prediction_and_reconcile
+            interp.js: remote_interpolation
+          engine:
+            renderer.js: threejs_scene_and_postfx
+            assets.js: loaders_and_cache
+            physics.js: cosmetic_local_physics
+            audio.js: sound_system
+          game:
+            input.js: keyboard_mouse_gamepad
+            weapons.js: local_fx_and_fire_requests
+            hud.js: health_ammo_score
+            entities.js: render_proxies
+          shaders:
+            vertex.glsl: vertex_shader
+            fragment.glsl: fragment_shader
+        package.json: optional_bundle_config
+        README.md: client_docs
+
+shared:
+  schema.json: canonical_protocol_schema
+  constants.json: shared_weapon_and_map_constants
+
+tools:
+  pack_assets.py: validate_and_manifest_assets
+  export_map.py: blender_to_json_export
+
+protocol:
+  transport:
+    realtime: websocket
+    meta: http
+  rules:
+    - client_sends_inputs_not_positions
+    - server_sends_snapshots_and_events
+  client_to_server:
+    hello: [client_version, auth, preferred_region]
+    join: [room_id_or_matchmake, player_name]
+    input:
+      fields: [seq, dt, moveX, moveY, jump, sprint, yaw, pitch, fire, weaponId, reload]
+    chat: [text]
+    leave: []
+  server_to_client:
+    welcome: [player_id, tickrate, room_id, seed, map_id]
+    snapshot:
+      fields:
+        - serverTick
+        - you: [pos, vel, hp, armor, ammo]
+        - others
+        - projectiles
+        - pickups
+    event: [type, payload]
+    pong: [t]
+
+sync:
+  prediction: client_side_local_player
+  reconciliation: rewind_and_replay_on_mismatch
+  interpolation:
+    buffer_ms: 100-150
+    extrapolation_cap: enabled
+
+simulation:
+  movement:
+    clamps:
+      - max_speed
+      - acceleration
+      - jump_cadence
+      - friction
+      - collision_constraints
+  weapons:
+    families:
+      hitscan:
+        resolution: server_raycast
+      projectile:
+        resolution: server_spawned_entities
+    authority:
+      - rate_of_fire
+      - ammo_and_reload
+      - spread_seeded_by_tick_and_player
+      - damage_rules
+  collision:
+    representation:
+      - aabb
+      - sphere
+      - capsule
+    broadphase: grid_or_sap
+    narrowphase:
+      - capsule_vs_aabb
+      - ray_vs_aabb
+
+maps:
+  authoring: blender
+  export:
+    client: glb_visual_mesh
+    server: json_colliders_spawns
+  debug_overlay: optional_client
+
+ai:
+  side: server_only
+  navigation:
+    phase1: grid_astar
+    phase2: navmesh
+  behavior: utility_scoring
+  weapons: same_as_players
+
+multiplayer:
+  local:
+    split_screen:
+      approach:
+        - multiple_local_controllers
+        - multiple_ws_connections_to_localhost
+        - multiple_viewports
+    lan:
+      approach: dedicated_server_on_local_network
+  online:
+    model: dedicated_server
+    features:
+      - matchmaking_endpoint
+      - region_ping
+      - reconnect_and_resync
+      - version_gating
+
+phases:
+  phase1:
+    - rooms_and_tick_loop
+    - one_map
+    - movement_and_collision
+    - pistol_weapon
+    - hp_death_respawn
+    - snapshot_sync
+    - basic_hud
+  phase2:
+    - shotgun_and_rocket
+    - armor_and_pickups
+    - hit_markers_and_kill_feed
+    - scoreboard_and_win_conditions
+  phase3:
+    - bots
+    - fx_and_audio
+    - settings
+  phase4:
+    - rate_limiting
+    - delta_snapshots
+    - metrics_and_logs
+    - sqlite_persistence
+
+security:
+  server_rejects:
+    - invalid_input_order
+    - speed_and_accel_violations
+    - impossible_turn_rates
+  never_trust:
+    - client_positions
+    - client_hits
+  deterministic_seeds:
+    - weapon_spread
+    - recoil
+    - loot_timing
+
+deployment:
+  client:
+    type: static_host
+    examples: [nginx, s3, cloudflare_pages]
+  server:
+    type: vps_or_container
+  cors:
+    websocket_origin_whitelist: enabled
+  versioning:
+    client_checks: /version_endpoint

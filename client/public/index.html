@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>FPS Test Arena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/public/styles.css?v=rewrite6" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="overlay" class="overlay">
+        <div class="panel">
+          <div class="brand">
+            <div class="brand__title">FPS Test Arena</div>
+            <div class="brand__sub">Authoritative Python server · Thin Three.js client</div>
+          </div>
+
+          <div class="form">
+            <label>
+              <span>Server WS</span>
+              <input id="wsUrl" value="ws://localhost:8765/ws" />
+            </label>
+            <label>
+              <span>Name</span>
+              <input id="name" value="Player" maxlength="24" />
+            </label>
+            <label>
+              <span>Room (optional)</span>
+              <input id="room" value="" placeholder="e.g. ab12cd34" />
+            </label>
+
+            <div class="row">
+              <button id="btnMatchmake" class="btn btn--primary">Matchmake</button>
+              <button id="btnJoin" class="btn">Join Room</button>
+            </div>
+
+            <div class="row row--small">
+              <label class="toggle">
+                <input id="split" type="checkbox" />
+                <span>Local Split (2 players)</span>
+              </label>
+              <label class="toggle">
+                <input id="wantDeltas" type="checkbox" checked />
+                <span>Delta Snapshots</span>
+              </label>
+            </div>
+
+            <div class="settings">
+              <div class="settings__title">Settings</div>
+              <div class="row row--small">
+                <label class="toggle">
+                  <input id="invertX" type="checkbox" />
+                  <span>Invert Look X</span>
+                </label>
+                <label class="toggle">
+                  <input id="invertY" type="checkbox" />
+                  <span>Invert Look Y</span>
+                </label>
+              </div>
+              <label>
+                <span>Sensitivity <span id="sensVal" class="sensVal">1.0</span></span>
+                <input id="sens" type="range" min="0.5" max="3.0" step="0.1" value="1.0" />
+              </label>
+            </div>
+
+            <div class="help">
+              <div><span class="kbd">P1</span> <span class="kbd">WASD</span> move, <span class="kbd">Mouse</span> look, <span class="kbd">LMB</span> fire</div>
+              <div><span class="kbd">P1</span> <span class="kbd">Space</span> jump, <span class="kbd">L-Shift</span> sprint, <span class="kbd">R</span> reload, <span class="kbd">1/2/3</span> weapons</div>
+              <div><span class="kbd">P2</span> <span class="kbd">Arrows</span> move, <span class="kbd">IJKL</span> look, <span class="kbd">;</span> fire</div>
+              <div><span class="kbd">P2</span> <span class="kbd">Enter</span> jump, <span class="kbd">R-Shift</span> sprint, <span class="kbd">/</span> reload, <span class="kbd">Num 1/2/3</span> weapons</div>
+              <div>Click the game to lock pointer (P1). Split-screen opens two WS connections to the same room.</div>
+            </div>
+
+            <div id="status" class="status">Not connected</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="hud" class="hud">
+        <div class="hud__left">
+          <div class="hud__bar">
+            <div class="hud__label">HP</div>
+            <div class="bar"><div id="hpFill" class="bar__fill bar__fill--hp"></div></div>
+            <div id="hpText" class="hud__value">100</div>
+          </div>
+          <div class="hud__bar">
+            <div class="hud__label">AR</div>
+            <div class="bar"><div id="arFill" class="bar__fill bar__fill--ar"></div></div>
+            <div id="arText" class="hud__value">0</div>
+          </div>
+        </div>
+
+        <div id="hudSplit" class="hudSplit">
+          <div class="hudSplit__pane hudSplit__pane--top">
+            <div class="hudSplit__tag">P1</div>
+            <div class="hudSplit__row">
+              <div class="hudSplit__bar">
+                <div class="hudSplit__label">HP</div>
+                <div class="bar"><div id="hpFill1" class="bar__fill bar__fill--hp"></div></div>
+                <div id="hpText1" class="hud__value">100</div>
+              </div>
+              <div class="hudSplit__bar">
+                <div class="hudSplit__label">AR</div>
+                <div class="bar"><div id="arFill1" class="bar__fill bar__fill--ar"></div></div>
+                <div id="arText1" class="hud__value">0</div>
+              </div>
+              <div class="hudSplit__ammo">
+                <div id="weaponText1" class="hud__weapon">pistol</div>
+                <div id="ammoText1" class="hud__ammoNum">12</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hudSplit__pane hudSplit__pane--bottom">
+            <div class="hudSplit__tag">P2</div>
+            <div class="hudSplit__row">
+              <div class="hudSplit__bar">
+                <div class="hudSplit__label">HP</div>
+                <div class="bar"><div id="hpFill2" class="bar__fill bar__fill--hp"></div></div>
+                <div id="hpText2" class="hud__value">100</div>
+              </div>
+              <div class="hudSplit__bar">
+                <div class="hudSplit__label">AR</div>
+                <div class="bar"><div id="arFill2" class="bar__fill bar__fill--ar"></div></div>
+                <div id="arText2" class="hud__value">0</div>
+              </div>
+              <div class="hudSplit__ammo">
+                <div id="weaponText2" class="hud__weapon">pistol</div>
+                <div id="ammoText2" class="hud__ammoNum">12</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud__center">
+          <div class="crosshair crosshair--solo"></div>
+          <div class="crosshair crosshair--top"></div>
+          <div class="crosshair crosshair--bottom"></div>
+          <div id="feed" class="feed"></div>
+        </div>
+
+        <div class="hud__right">
+          <div class="hud__ammo">
+            <div id="weaponText" class="hud__weapon">pistol</div>
+            <div id="ammoText" class="hud__ammoNum">12</div>
+          </div>
+          <div class="hud__meta">
+            <div id="pingText">ping: --</div>
+            <div id="roomText">room: --</div>
+            <div id="scoreText">kills: 0 deaths: 0</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="viewport" class="viewport" tabindex="0"></div>
+
+      <div id="touch" class="touch" aria-hidden="true">
+        <div id="touchMove" class="touch__move" aria-hidden="true">
+          <div class="stickBase">
+            <div id="touchStick" class="stick"></div>
+          </div>
+        </div>
+
+        <div id="touchLook" class="touch__look" aria-hidden="true"></div>
+
+        <div class="touch__buttons" aria-hidden="true">
+          <button id="touchFire" class="tbtn tbtn--fire" type="button">FIRE</button>
+          <button id="touchJump" class="tbtn" type="button">JUMP</button>
+          <button id="touchReload" class="tbtn" type="button">RLD</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js?v=rewrite6"></script>
+  </body>
+</html>

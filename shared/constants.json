@@ -1,0 +1,53 @@
+{
+  "protocolVersion": 1,
+  "simulationHz": 60,
+  "snapshotHz": 15,
+  "defaultMapId": "map01",
+  "maps": [
+    {"mapId": "map01", "name": "Test Arena"}
+  ],
+  "weapons": [
+    {
+      "weaponId": "pistol",
+      "family": "hitscan",
+      "damage": 18.0,
+      "fireRate": 3.0,
+      "spreadRad": 0.01,
+      "pellets": 1,
+      "range": 80.0,
+      "maxAmmo": 12,
+      "reloadSec": 1.4,
+      "projectileSpeed": 0.0,
+      "projectileRadius": 0.25,
+      "explosionRadius": 0.0
+    },
+    {
+      "weaponId": "shotgun",
+      "family": "hitscan",
+      "damage": 8.0,
+      "fireRate": 1.0,
+      "spreadRad": 0.10,
+      "pellets": 8,
+      "range": 35.0,
+      "maxAmmo": 8,
+      "reloadSec": 2.6,
+      "projectileSpeed": 0.0,
+      "projectileRadius": 0.25,
+      "explosionRadius": 0.0
+    },
+    {
+      "weaponId": "rocket",
+      "family": "projectile",
+      "damage": 95.0,
+      "fireRate": 0.8,
+      "spreadRad": 0.0,
+      "pellets": 1,
+      "range": 120.0,
+      "maxAmmo": 4,
+      "reloadSec": 3.2,
+      "projectileSpeed": 22.0,
+      "projectileRadius": 0.18,
+      "explosionRadius": 3.0
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FPS Authoritative Multiplayer Protocol",
+  "type": "object",
+  "oneOf": [
+    {"$ref": "#/defs/c2s"},
+    {"$ref": "#/defs/s2c"}
+  ],
+  "defs": {
+    "envelope": {
+      "type": "object",
+      "required": ["type", "data"],
+      "properties": {
+        "type": {"type": "string"},
+        "data": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "c2s": {
+      "allOf": [
+        {"$ref": "#/defs/envelope"},
+        {
+          "properties": {
+            "type": {"enum": ["hello", "join", "input", "chat", "leave", "ping"]},
+            "data": {"type": "object"}
+          }
+        }
+      ]
+    },
+    "s2c": {
+      "allOf": [
+        {"$ref": "#/defs/envelope"},
+        {
+          "properties": {
+            "type": {"enum": ["welcome", "snapshot", "event", "pong", "error", "info", "version"]},
+            "data": {"type": "object"}
+          }
+        }
+      ]
+    }
+  }
+}

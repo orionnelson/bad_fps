@@ -1,0 +1,12 @@
+{
+  "copied": [
+    {
+      "src": "shared/constants.json",
+      "dst": "client/public/shared/constants.json"
+    },
+    {
+      "src": "shared/schema.json",
+      "dst": "client/public/shared/schema.json"
+    }
+  ]
+}
